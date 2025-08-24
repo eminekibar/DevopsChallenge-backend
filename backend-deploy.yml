@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deploy
+  namespace: devopschallenge
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: backend }
+  template:
+    metadata: { labels: { app: backend } }
+    spec:
+      containers:
+        - name: app
+          image: eminekibar/devopschallenge-backend:manual
+          ports: [{ containerPort: 8080 }]
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://0.0.0.0:8080"
+          readinessProbe:
+            httpGet: { path: /api/values, port: 8080 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/values, port: 8080 }
+            initialDelaySeconds: 15
+            periodSeconds: 20
