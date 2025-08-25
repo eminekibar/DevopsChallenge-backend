@@ -5,7 +5,8 @@ metadata:
   namespace: devopschallenge
 spec:
   type: NodePort
-  selector: { app: backend }
+  selector:
+    app: backend
   ports:
     - name: http
       port: 11130
