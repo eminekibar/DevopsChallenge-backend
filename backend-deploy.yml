@@ -8,14 +8,18 @@ metadata:
 spec:
   replicas: 2
   selector:
-    matchLabels: { app: backend }
+    matchLabels:
+      app: backend
   template:
-    metadata: { labels: { app: backend } }
+    metadata:
+      labels:
+        app: backend
     spec:
-      replicas: 2
-      template:
-        spec:
-          containers:
-          - name: app
-            image: eminekibar/devopschallenge-backend:manual
-            ports: [{ containerPort: 8080 }]
+      containers:
+        - name: app
+          image: eminekibar/devopschallenge-backend:manual
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_URLS
+              value: "http://0.0.0.0:8080"
