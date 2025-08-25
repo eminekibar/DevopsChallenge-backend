@@ -23,16 +23,24 @@ spec:
               value: "http://0.0.0.0:11130"
           ports:
             - containerPort: 11130
+
+          # (isteğe bağlı ama faydalı) soğuk başlangıç için zaman tanır
+          startupProbe:
+            tcpSocket:
+              port: 11130
+            periodSeconds: 5
+            failureThreshold: 30
+
           readinessProbe:
             httpGet: { path: "/healthz", port: 11130 }
             initialDelaySeconds: 5
             periodSeconds: 10
+
           livenessProbe:
             httpGet: { path: "/healthz", port: 11130 }
             initialDelaySeconds: 30
             periodSeconds: 20
+
           resources:
             requests: { cpu: "100m", memory: "128Mi" }
             limits:   { cpu: "300m", memory: "256Mi" }
-
-
