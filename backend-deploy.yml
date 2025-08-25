@@ -8,27 +8,14 @@ metadata:
 spec:
   replicas: 2
   selector:
-    matchLabels:
-      app: backend
+    matchLabels: { app: backend }
   template:
-    metadata:
-      labels:
-        app: backend
+    metadata: { labels: { app: backend } }
     spec:
-      containers:
-        - name: app
-          image: eminekibar/devopschallenge-backend:manual
-          ports:
-            - containerPort: 8080
-          readinessProbe:
-            httpGet:
-              path: /api/values
-              port: 8080
-            initialDelaySeconds: 5
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /api/values
-              port: 8080
-            initialDelaySeconds: 15
-            periodSeconds: 20
+      replicas: 2
+      template:
+        spec:
+          containers:
+          - name: app
+            image: eminekibar/devopschallenge-backend:manual
+            ports: [{ containerPort: 8080 }]
