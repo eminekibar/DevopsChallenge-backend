@@ -6,7 +6,7 @@ metadata:
   labels:
     app: backend
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -23,24 +23,33 @@ spec:
               value: "http://0.0.0.0:11130"
           ports:
             - containerPort: 11130
-
-          # (isteğe bağlı ama faydalı) soğuk başlangıç için zaman tanır
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
           startupProbe:
             tcpSocket:
               port: 11130
             periodSeconds: 5
             failureThreshold: 30
-
           readinessProbe:
             httpGet: { path: "/healthz", port: 11130 }
             initialDelaySeconds: 5
             periodSeconds: 10
-
           livenessProbe:
             httpGet: { path: "/healthz", port: 11130 }
             initialDelaySeconds: 30
             periodSeconds: 20
-
+        - name: loader
+          image: busybox:1.36
+          command: ["sh","-c","sleep 360000"]
           resources:
-            requests: { cpu: "100m", memory: "128Mi" }
-            limits:   { cpu: "300m", memory: "256Mi" }
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
