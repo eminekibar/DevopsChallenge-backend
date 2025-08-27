@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Npgsql; // eklendi
 
 namespace backend.Controllers
 {
@@ -7,15 +8,41 @@ namespace backend.Controllers
 
     public class ValuesController : Controller
     {
+        private readonly IConfiguration _config;
+
+        public ValuesController(IConfiguration config)
+        {
+            _config = config;
+        }
         //https://localhost:7081/api/values?YourName=Emine
 
         [HttpGet]
         public IActionResult Get(string YourName)
         {
-            List<string> _data = new List<string>()
+            var message = "Hello Ziraat Team from " + YourName;   // <-- EKSİK OLAN SATIR
+
+            // Response verin istersen eski listen kalsın:
+            var _data = new List<string> { message };
+
+            // Connection string (appsettings.json veya Kubernetes env’den gelir)
+            string connString = _config.GetConnectionString("DefaultConnection");
+
+            // DB’ye kaydet
+            try
             {
-                "Hello Ziraat Team from " + YourName
-            };
+                using var conn = new NpgsqlConnection(connString);
+                conn.Open();
+                using var cmd = new NpgsqlCommand(
+                    "INSERT INTO messages (name, text) VALUES (@n, @t)", conn);
+                cmd.Parameters.AddWithValue("n", YourName);
+                cmd.Parameters.AddWithValue("t", message);
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                // hata olursa logla ama response’u bozma
+                Console.WriteLine("DB error: " + ex.Message);
+            }
 
             return Ok(_data);
         }
