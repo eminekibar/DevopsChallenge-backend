@@ -18,16 +18,14 @@ spec:
       containers:
         - name: app
           image: eminekibar/devopschallenge-backend:manual
-          env:
-            - name: ASPNETCORE_URLS
-              value: "http://0.0.0.0:11130"
           envFrom:
             - secretRef:
                 name: postgres-secret
           env:
+            - name: ASPNETCORE_URLS
+              value: "http://0.0.0.0:11130"
             - name: ConnectionStrings__DefaultConnection
               value: "Host=postgres;Port=5432;Database=mydb;Username=$(POSTGRES_USER);Password=$(POSTGRES_PASSWORD)"
-
           ports:
             - containerPort: 11130
           resources:
