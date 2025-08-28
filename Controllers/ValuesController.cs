@@ -25,7 +25,7 @@ namespace backend.Controllers
             var _data = new List<string> { message };
 
             // Connection string (appsettings.json veya Kubernetes env’den gelir)
-            string connString = _config.GetConnectionString("DefaultConnection") ? "";
+            string connString = _config.GetConnectionString("DefaultConnection") ?? "";
 
             // DB’ye kaydet
             try
