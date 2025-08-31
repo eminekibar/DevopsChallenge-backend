@@ -40,7 +40,7 @@ spec:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
             - name: ConnectionStrings__DefaultConnection
-              value: "Host=postgres.devopschallenge.svc.cluster.local;Port=5432;Database=mydb;Username=$(POSTGRES_USERNAME);Password=$(POSTGRES_PASSWORD)"
+              value: "Host=postgres.devopschallenge.svc.cluster.local;Port=5432;Database=mydb;Username=$(POSTGRES_USER);Password=$(POSTGRES_PASSWORD)"
           ports:
             - containerPort: 11130
           resources:
