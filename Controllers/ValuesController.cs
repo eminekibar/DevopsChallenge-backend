@@ -37,7 +37,7 @@ namespace backend.Controllers
                 using var conn = new NpgsqlConnection(connString);
                 conn.Open();
                 using var cmd = new NpgsqlCommand(
-                    "INSERT INTO messages (name, message) VALUES (@n, @t)", conn);
+                    "INSERT INTO messages (name, text) VALUES (@n, @t)", conn);
                 cmd.Parameters.AddWithValue("n", YourName);
                 cmd.Parameters.AddWithValue("t", message);
                 cmd.ExecuteNonQuery();
