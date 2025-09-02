@@ -9,46 +9,48 @@ namespace backend.Controllers
     public class ValuesController : Controller
     {
         private readonly IConfiguration _config;
+        public ValuesController(IConfiguration config) => _config = config;
 
-        public ValuesController(IConfiguration config)
-        {
-            _config = config;
-        }
-        //https://localhost:7081/api/values?YourName=Emine
-
+        // Basit selamlama (DB'ye yazmaz)
+        // GET /api/values?YourName=Emine
         [HttpGet]
-        public IActionResult Get(string YourName)
+        public IActionResult Get([FromQuery] string YourName)
         {
-            var message = "Hello Ziraat Team from " + YourName;   // <-- EKSİK OLAN SATIR
+            var message = "Hello Ziraat Team from " + YourName;
+            return Ok(new[] { message });
+        }
 
-            // Response verin istersen eski listen kalsın:
-            var _data = new List<string> { message };
+        public record Msg(string Name, string Message);
 
-            string? connString = _config.GetConnectionString("DefaultConnection");
-
+        // INSERT endpoint'i
+        // POST /api/values   body: { "name": "emine", "message": "pipelines rock" }
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Msg dto)
+        {
+            var connString = _config.GetConnectionString("DefaultConnection");
             if (string.IsNullOrWhiteSpace(connString))
-            {
-                throw new InvalidOperationException("Database connection string not configured!");
-            }
+                return StatusCode(500, "Database connection string not configured!");
 
-            // DB’ye kaydet
             try
             {
-                using var conn = new NpgsqlConnection(connString);
-                conn.Open();
-                using var cmd = new NpgsqlCommand(
-                    "INSERT INTO messages (name, text) VALUES (@n, @t)", conn);
-                cmd.Parameters.AddWithValue("n", YourName);
-                cmd.Parameters.AddWithValue("t", message);
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception ex)
-            {
-                // hata olursa logla ama response’u bozma
-                Console.WriteLine("DB error: " + ex.Message);
-            }
+                await using var conn = new NpgsqlConnection(connString);
+                await conn.OpenAsync();
 
-            return Ok(_data);
+                // DİKKAT: sütun adı message
+                const string sql = @"INSERT INTO messages(name, message) VALUES (@name, @message);";
+                await using var cmd = new NpgsqlCommand(sql, conn);
+                cmd.Parameters.AddWithValue("name", dto.Name);
+                cmd.Parameters.AddWithValue("message", dto.Message);
+                await cmd.ExecuteNonQueryAsync();
+
+                return Ok(new { inserted = true });
+            }
+            catch (PostgresException pgx)
+            {
+                // kubectl logs'ta görünür
+                Console.WriteLine($"DB error: {pgx.SqlState}: {pgx.MessageText}\nPOSITION: {pgx.Position}");
+                return StatusCode(500, "DB error");
+            }
         }
     }
 }
