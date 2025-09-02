@@ -1,4 +1,3 @@
-# allow-ingress-to-backend.yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -6,12 +5,15 @@ metadata:
   namespace: devopschallenge
 spec:
   podSelector:
-    matchLabels: { app: backend }
-  policyTypes: [Ingress]
+    matchLabels:
+      app: backend
+  policyTypes:
+    - Ingress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          kubernetes.io/metadata.name: ingress-nginx
-    ports:
-    - { protocol: TCP, port: 11130 }
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 11130

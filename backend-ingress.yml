@@ -15,6 +15,6 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: backend
+            name: backend      # <- düz deployment’ındaki Service adı
             port:
               number: 11130
