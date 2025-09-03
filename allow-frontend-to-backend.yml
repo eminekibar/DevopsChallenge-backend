@@ -6,13 +6,14 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app: backend
-  policyTypes: [Ingress]
-  ingress:
-  - from:
+      app: frontend
+  policyTypes:
+  - Egress
+  egress:
+  - to:
     - podSelector:
         matchLabels:
-          app: frontend
+          app: backend
     ports:
     - protocol: TCP
       port: 11130
