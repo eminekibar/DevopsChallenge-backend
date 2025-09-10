@@ -3,18 +3,24 @@ kind: Ingress
 metadata:
   name: backend-ingress
   namespace: devopschallenge
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+  annotations: {}
 spec:
   ingressClassName: nginx
   rules:
   - host: api.127.0.0.1.nip.io
     http:
       paths:
-      - path: /
+      - path: /healthz
         pathType: Prefix
         backend:
           service:
-            name: backend      # <- düz deployment’ındaki Service adı
+            name: backend
+            port:
+              number: 11130
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backend
             port:
               number: 11130
