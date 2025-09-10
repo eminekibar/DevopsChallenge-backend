@@ -21,6 +21,8 @@ spec:
           envFrom:
             - secretRef:
                 name: postgres-secret
+            - secretRef:
+                name: backend-secret
           env:
             - name: ASPNETCORE_URLS
               value: "http://0.0.0.0:11130"
@@ -39,8 +41,7 @@ spec:
                 secretKeyRef:
                   name: postgres-secret
                   key: POSTGRES_PASSWORD
-            - name: ConnectionStrings__DefaultConnection
-              value: "Host=postgres.devopschallenge.svc.cluster.local;Port=5432;Database=mydb;Username=$(POSTGRES_USER);Password=$(POSTGRES_PASSWORD)"
+            # Connection string artık backend-secret'ten geliyor (envFrom)
           ports:
             - containerPort: 11130
           resources:
