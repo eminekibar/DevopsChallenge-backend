@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql; // eklendi
+using Npgsql;
 
 namespace backend.Controllers
 {
-    [ApiController]                          // Bunu ekle
-    [Route("api/[controller]")]              // Route tanımı
+    [ApiController]
+    [Route("api/[controller]")]
 
     public class ValuesController : Controller
     {
@@ -19,9 +19,8 @@ namespace backend.Controllers
         [HttpGet]
         public IActionResult Get(string YourName)
         {
-            var message = "Hello Ziraat Team from " + YourName;   // <-- EKSİK OLAN SATIR
+            var message = "Hello Ziraat Team from " + YourName;
 
-            // Response verin istersen eski listen kalsın:
             var _data = new List<string> { message };
 
             string? connString = _config.GetConnectionString("DefaultConnection");
@@ -31,7 +30,6 @@ namespace backend.Controllers
                 throw new InvalidOperationException("Database connection string not configured!");
             }
 
-            // DB’ye kaydet
             try
             {
                 using var conn = new NpgsqlConnection(connString);
@@ -44,7 +42,6 @@ namespace backend.Controllers
             }
             catch (Exception ex)
             {
-                // hata olursa logla ama response’u bozma
                 Console.WriteLine("DB error: " + ex.Message);
             }
 
