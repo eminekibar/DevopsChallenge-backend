@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Emine\\concourse\\backend-repo\\backend.csproj": {}
+    "C:\\Users\\Emine\\Desktop\\staj\\DevopsChallenge-backend\\backend.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Emine\\concourse\\backend-repo\\backend.csproj": {
+    "C:\\Users\\Emine\\Desktop\\staj\\DevopsChallenge-backend\\backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Emine\\concourse\\backend-repo\\backend.csproj",
+        "projectUniqueName": "C:\\Users\\Emine\\Desktop\\staj\\DevopsChallenge-backend\\backend.csproj",
         "projectName": "backend",
-        "projectPath": "C:\\Users\\Emine\\concourse\\backend-repo\\backend.csproj",
+        "projectPath": "C:\\Users\\Emine\\Desktop\\staj\\DevopsChallenge-backend\\backend.csproj",
         "packagesPath": "C:\\Users\\Emine\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Emine\\concourse\\backend-repo\\obj\\",
+        "outputPath": "C:\\Users\\Emine\\Desktop\\staj\\DevopsChallenge-backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

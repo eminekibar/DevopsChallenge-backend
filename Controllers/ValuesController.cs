@@ -1,49 +1,104 @@
+using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace backend.Controllers
 {
-    [ApiController] //Denetleyici sınıfının bir API denetleyicisi olduğunu belirtir.
-    [Route("api/[controller]")] //Denetleyicinin URL yolunu tanımlar. [controller] yer tutucusu, denetleyici sınıfının adını temsil eder.
-
-    public class ValuesController : Controller //Denetleyici sınıfı
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ValuesController : Controller
     {
-        private readonly IConfiguration _config; //Yapılandırma ayarlarını tutmak için kullanılan özel alan.
+        private readonly IConfiguration _config;
+        private readonly ILogger<ValuesController> _logger;
 
-        public ValuesController(IConfiguration config) //Yapılandırma ayarlarını alır ve özel alana atar.
+        public ValuesController(IConfiguration config, ILogger<ValuesController> logger)
         {
             _config = config;
+            _logger = logger;
         }
 
-        [HttpGet] //HTTP GET isteklerini işlemek için kullanılır.
-        public IActionResult Get(string YourName) //Get metodunu tanımlar ve bir parametre alır.
+        [HttpGet]
+        public IActionResult Get(string YourName)
         {
             var message = "Hello Ziraat Team from " + YourName;
+            var data = new List<string> { message };
 
-            var _data = new List<string> { message }; 
-
-            string? connString = _config.GetConnectionString("DefaultConnection"); //Yapılandırma dosyasından veritabanı bağlantı dizesini alır.
-
-            if (string.IsNullOrWhiteSpace(connString)) //Bağlantı dizesinin boş olup olmadığını kontrol eder.
+            var connString = ResolveConnectionString();
+            if (string.IsNullOrWhiteSpace(connString))
             {
-                throw new InvalidOperationException("Database connection string not configured!"); //Boşsa bir hata fırlatır.
+                _logger.LogError("Database connection string could not be resolved.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { error = "Veritabani baglantisi yapilandirilamadi." });
             }
 
-            try //Veritabanı işlemlerini gerçekleştirmek için try bloğu.
+            try
             {
-                using var conn = new NpgsqlConnection(connString); //NpgsqlConnection nesnesi oluşturur.
-                conn.Open(); //Veritabanı bağlantısını açar.
-                using var cmd = new NpgsqlCommand("INSERT INTO messages (name, text) VALUES (@n, @t)", conn); //SQL komutunu hazırlar.
-                cmd.Parameters.AddWithValue("n", YourName); //Parametreleri ekler.
-                cmd.Parameters.AddWithValue("t", message); 
-                cmd.ExecuteNonQuery(); //SQL komutunu çalıştırır.
+                using var conn = new NpgsqlConnection(connString);
+                conn.Open();
+
+                using var cmd = new NpgsqlCommand(
+                    "INSERT INTO messages (name, text) VALUES (@n, @t)", conn);
+                cmd.Parameters.AddWithValue("n", YourName);
+                cmd.Parameters.AddWithValue("t", message);
+                cmd.ExecuteNonQuery();
             }
-            catch (Exception ex) //Hata durumunda yakalar.
+            catch (Exception ex)
             {
-                Console.WriteLine("DB error: " + ex.Message);
+                _logger.LogError(ex, "Database insert failed.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { error = "Veritabani kaydi sirasinda hata olustu." });
             }
 
-            return Ok(_data); //HTTP 200 OK yanıtı döner ve verileri içerir.
+            return Ok(data);
+        }
+
+        private string? ResolveConnectionString()
+        {
+            var configured = _config.GetConnectionString("DefaultConnection");
+            if (!string.IsNullOrWhiteSpace(configured))
+            {
+                var expanded = Environment.ExpandEnvironmentVariables(configured);
+                if (!string.IsNullOrWhiteSpace(expanded) && !expanded.Contains("${"))
+                {
+                    return expanded;
+                }
+            }
+
+            var host = Environment.GetEnvironmentVariable("POSTGRES_HOST")
+                       ?? "postgres.devopschallenge.svc.cluster.local";
+            var database = Environment.GetEnvironmentVariable("POSTGRES_DB");
+            var user = Environment.GetEnvironmentVariable("POSTGRES_USER");
+            var password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD");
+            var portValue = Environment.GetEnvironmentVariable("POSTGRES_PORT");
+
+            if (string.IsNullOrWhiteSpace(database) ||
+                string.IsNullOrWhiteSpace(user) ||
+                string.IsNullOrWhiteSpace(password))
+            {
+                return null;
+            }
+
+            var port = 5432;
+            if (!string.IsNullOrWhiteSpace(portValue) &&
+                int.TryParse(portValue, out var parsedPort))
+            {
+                port = parsedPort;
+            }
+
+            var builder = new NpgsqlConnectionStringBuilder
+            {
+                Host = host,
+                Port = port,
+                Database = database,
+                Username = user,
+                Password = password
+            };
+
+            return builder.ToString();
         }
     }
 }
