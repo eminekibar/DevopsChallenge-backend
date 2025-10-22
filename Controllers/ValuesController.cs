@@ -14,7 +14,6 @@ namespace backend.Controllers
         {
             _config = config;
         }
-        //https://localhost:7081/api/values?YourName=Emine
 
         [HttpGet]
         public IActionResult Get(string YourName)
